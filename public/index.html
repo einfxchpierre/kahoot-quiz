@@ -654,7 +654,7 @@
       } else if (joined) {
         status.innerHTML = "Du bist dabei als <strong>" + escapeHtml(state.joinedName) + "</strong> – warte auf den Start!";
       } else {
-        status.textContent = "Die Runde wartet auf den Start. Trag deinen Namen ein! Ein Admin oder Lehrer startet die Runde.";
+        status.textContent = "Die Runde wartet auf den Start. Trag deinen Namen ein! Ein Admin startet die Runde.";
       }
 
       $("#queue-count").textContent = state.queue.length + " / " + state.maxPlayers;
