@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-const PORT = Number(process.env.PORT) || ;
+const PORT = Number(process.env.PORT) || 3000;
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65_535) {
   throw new Error("The hosting provider must set a valid PORT environment variable.");
 }
