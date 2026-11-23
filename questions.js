@@ -1,6 +1,7 @@
 // Start-Fragen. Beim ersten Start werden sie in data/questions.json übernommen.
 // Danach werden die Fragen im Admin-Bereich der Seite bearbeitet.
 // Optional kann jede Frage ein Bild haben: image: "/uploads/....jpg" (wird im Admin-Bereich hochgeladen).
+// Optional: duration (Sekunden) und points ("standard", "double" oder "none").
 module.exports = [
   {
     text: "Was sind Fremdwörter?",
@@ -40,6 +41,7 @@ module.exports = [
   {
     text: "Vielen Dank für die Teilnahme an diesem Quiz! Ich hoffe, es hat dir gefallen und du hast etwas Neues gelernt. Wenn du Fragen hast, wende dich gerne an mich. Ich wünsche dir noch einen schönen Tag!",
     options: ["Klicke auf den Button, um das Quiz zu beenden."],
-    correctIndices: [0]
+    correctIndices: [0],
+    points: "none"
   }
 ];
