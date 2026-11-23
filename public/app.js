@@ -10,13 +10,8 @@ const LETTERS = ["A", "B", "C", "D"];
 const MAX_OPTIONS = 4;
 const RING = 2 * Math.PI * 26; // Umfang des Timer-Rings
 
-// Eigene Antwort-Symbole: Stern, Herz, Blitz, Mond
-const SHAPES = [
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
-];
+// Antwort-Symbole: fette Buchstaben in farbigen Feldern
+const SHAPES = LETTERS;
 
 /* ---------- Kleine Helfer ---------- */
 
@@ -173,7 +168,7 @@ const Sound = (() => {
 
 function launchConfetti(amount = 140) {
   if (reducedMotion()) return;
-  const colors = ["#8b5cf6", "#ec4899", "#22d3ee", "#fbbf24", "#22c55e", "#ffffff", "#f97316"];
+  const colors = ["#c6f432", "#ff5a1f", "#2b4eff", "#111111", "#ffc531", "#ffffff"];
   const layer = document.createElement("div");
   layer.className = "confetti-layer";
   for (let i = 0; i < amount; i += 1) {
@@ -212,21 +207,6 @@ function burst(emojis, x = window.innerWidth / 2, y = window.innerHeight / 2.6, 
   }
 }
 
-(function startFloaters() {
-  const layer = $(".floaters");
-  if (!layer || reducedMotion()) return;
-  const items = ["❓", "⭐", "💡", "🏆", "✨", "🧠", "⚡", "🎉", "🎯", "💜"];
-  for (let i = 0; i < 12; i += 1) {
-    const span = document.createElement("span");
-    span.textContent = items[i % items.length];
-    span.style.left = (i * 8.3 + Math.random() * 5) + "%";
-    span.style.fontSize = 18 + Math.random() * 22 + "px";
-    span.style.animationDuration = 16 + Math.random() * 18 + "s";
-    span.style.animationDelay = -Math.random() * 30 + "s";
-    span.style.setProperty("--rot", (Math.random() * 360 - 180) + "deg");
-    layer.appendChild(span);
-  }
-})();
 
 /* ---------- Bausteine für Antworten, Ringe, Ranglisten ---------- */
 
@@ -328,7 +308,7 @@ function revealRows(state, myAnswers = []) {
       + shape(index)
       + "<span class='rr-text'>" + escapeHtml(option) + (mine ? " <span class='mine-tag'>deine Wahl</span>" : "") + "</span>"
       + "<span class='rr-count'>" + count + "</span>"
-      + "<span class='rr-mark'>" + (correct ? "✅" : "") + "</span></div>";
+      + "<span class='rr-mark'>" + (correct ? "✓" : "") + "</span></div>";
   }).join("");
 }
 
@@ -671,7 +651,7 @@ function renderGame(state) {
     } else if (phase === "question") {
       stage.innerHTML = "<div class='stage stage-wait'>"
         + "<div class='wait-orb'>⚡</div>"
-        + "<h2 style='font-size:clamp(28px,6vw,44px);margin:0'>Antwort eingeloggt!</h2>"
+        + "<h2 class='wait-title'>Antwort eingeloggt!</h2>"
         + "<p class='muted' style='font-size:19px'>Mal sehen, ob du richtig liegst …</p>"
         + "<div class='chosen-list'>" + (me.answers || []).map((index) =>
             "<div class='tile' data-i='" + index + "'>" + shape(index) + "<span class='tile-text'>" + escapeHtml(question.options[index] || "") + "</span></div>").join("") + "</div>"
@@ -711,7 +691,7 @@ function buildQuestionStage(stage, state) {
   const question = state.question;
   const multiple = question.multiple;
   stage.innerHTML = "<div class='stage stage-question' id='q-stage'>"
-    + "<div class='game-top'><span class='pill'>Frage " + question.number + " / " + question.total + "</span>"
+    + "<div class='game-top'><span class='count-chip'>Frage " + question.number + " / " + question.total + "</span>"
     + pointsTag(question.points)
     + timerRing("player-ring") + "</div>"
     + "<div class='timebar'><div class='timebar-fill' id='timebar-fill'></div></div>"
@@ -722,9 +702,9 @@ function buildQuestionStage(stage, state) {
     + question.options.map((option, index) =>
         "<button type='button' class='answer" + (selected.has(index) ? " selected" : "") + "' data-i='" + index + "' data-answer='" + index + "'>"
         + shape(index) + "<span class='answer-text'>" + escapeHtml(option) + "</span>"
-        + "<span class='answer-letter'>" + LETTERS[index] + "</span></button>").join("")
+        + "</button>").join("")
     + "</div>"
-    + (multiple ? "<button type='button' class='btn big shine submit-answer' id='submit-answer'" + (selected.size ? "" : " disabled") + ">Antwort abschicken ✓</button>" : "")
+    + (multiple ? "<button type='button' class='btn dark big submit-answer' id='submit-answer'" + (selected.size ? "" : " disabled") + ">Antwort abschicken ✓</button>" : "")
     + "<p class='answer-hint' id='answer-hint'></p></div>";
 
   const image = $("#q-image");
@@ -944,7 +924,7 @@ function drawQr(code) {
     qr.make();
     box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: "QR-Code zum Mitmachen" });
   }).catch(() => {
-    box.innerHTML = "<div style='color:#160d3a;padding:20px;font-weight:800'>" + escapeHtml(window.location.host) + "</div>";
+    box.innerHTML = "<div style='color:#111;padding:20px;font-weight:800'>" + escapeHtml(window.location.host) + "</div>";
   });
 }
 
@@ -1018,7 +998,7 @@ function renderHost(state) {
         + "<p class='muted small'>QR-Code scannen und direkt mitmachen</p></section>"
         + "<section class='card'>"
         + "<div class='host-players-head'><div class='player-count' id='host-count'>0 <span>Spieler</span></div>"
-        + "<button type='button' class='btn huge shine pulse' id='host-start'>▶ Start</button></div>"
+        + "<button type='button' class='btn lime huge pulse' id='host-start'>▶ Start</button></div>"
         + "<div class='player-cloud host-cloud' id='host-cloud'></div>"
         + "<p class='muted small'>Tipp: Auf einen Namen klicken, um die Person zu entfernen.</p></section></div>";
       $("#host-cloud").dataset.sig = "";
@@ -1046,7 +1026,7 @@ function renderHost(state) {
         + (question.multiple ? "<p class='multi-note'>☑ Mehrere Antworten können richtig sein</p>" : "")
         + "<div class='tiles'>" + question.options.map((option, index) =>
             "<div class='tile' data-i='" + index + "'>" + shape(index) + "<span class='tile-text'>" + escapeHtml(option) + "</span></div>").join("") + "</div>"
-        + hostControls(["<button type='button' class='btn ghost' id='host-skip'>⏭ Überspringen</button>"])
+        + hostControls(["<button type='button' class='btn light' id='host-skip'>⏭ Überspringen</button>"])
         + "</div>";
       $("#host-skip").addEventListener("click", () => hostAction("/api/next"));
       Sound.play("go");
@@ -1064,9 +1044,9 @@ function renderHost(state) {
         + "<div class='tiles revealed'>" + question.options.map((option, index) => {
             const correct = state.reveal.correctIndices.includes(index);
             return "<div class='tile " + (correct ? "correct" : "wrong") + "' data-i='" + index + "'>" + shape(index)
-              + "<span class='tile-text'>" + escapeHtml(option) + "</span>" + (correct ? "<span class='check'>✅</span>" : "") + "</div>";
+              + "<span class='tile-text'>" + escapeHtml(option) + "</span>" + (correct ? "<span class='check'>✓</span>" : "") + "</div>";
           }).join("") + "</div>"
-        + hostControls(["<button type='button' class='btn big shine' id='host-next'>Weiter ▶</button>"])
+        + hostControls(["<button type='button' class='btn dark big' id='host-next'>Weiter ▶</button>"])
         + (state.autoAdvance ? "<div class='auto-bar' style='max-width:400px;margin:12px auto 0'><div id='host-auto'></div></div>" : "")
         + "</div>";
       $("#host-next").addEventListener("click", () => hostAction("/api/next"));
@@ -1075,7 +1055,7 @@ function renderHost(state) {
       stage.innerHTML = "<div class='host-stage'>"
         + "<h1 class='host-title'>📊 Zwischenstand</h1>"
         + "<div class='leaderboard host-board'>" + leaderboardRows(state.players, { limit: 5 }) + "</div>"
-        + hostControls(["<button type='button' class='btn big shine' id='host-next'>Nächste Frage ▶</button>"])
+        + hostControls(["<button type='button' class='btn dark big' id='host-next'>Nächste Frage ▶</button>"])
         + (state.autoAdvance ? "<div class='auto-bar' style='max-width:400px;margin:12px auto 0'><div id='host-auto'></div></div>" : "")
         + "</div>";
       $("#host-next").addEventListener("click", () => hostAction("/api/next"));
@@ -1086,9 +1066,9 @@ function renderHost(state) {
         + "<div class='podium'>" + podiumHTML(state.podium) + "</div>"
         + "<div class='leaderboard host-board' style='margin-top:10px'>" + leaderboardRows(state.players.slice(3), { showExtra: true, offset: 3 }) + "</div>"
         + hostControls([
-            "<button type='button' class='btn big shine' id='host-again'>🔁 Nochmal spielen</button>",
-            "<button type='button' class='btn ghost' id='host-csv'>⬇ Ergebnisse (CSV)</button>",
-            "<button type='button' class='btn gray' id='host-reset'>⏹ Runde beenden</button>",
+            "<button type='button' class='btn dark big' id='host-again'>🔁 Nochmal spielen</button>",
+            "<button type='button' class='btn light' id='host-csv'>⬇ Ergebnisse (CSV)</button>",
+            "<button type='button' class='btn light' id='host-reset'>⏹ Runde beenden</button>",
           ])
         + "</div>";
       if (state.players.length <= 3) $(".host-podium .host-board").remove();
@@ -1247,10 +1227,10 @@ function renderQuizList(quizzes) {
         return "<div class='quiz-item'><span class='quiz-icon'>" + icons[index % icons.length] + "</span>"
           + "<div class='quiz-info'><strong>" + escapeHtml(quiz.name) + "</strong>"
           + "<div class='muted small'>" + quiz.questionCount + (quiz.questionCount === 1 ? " Frage" : " Fragen") + " · " + statusText(quiz) + "</div></div>"
-          + "<span class='code-pill'>" + escapeHtml(quiz.code) + "</span>"
+          + "<span class='code-chip'>" + escapeHtml(quiz.code) + "</span>"
           + "<div class='quiz-actions'>"
-          + "<button type='button' class='btn small shine' data-quiz-action='present' data-id='" + id + "'>🖥️ Präsentieren</button>"
-          + "<button type='button' class='btn small secondary' data-quiz-action='edit' data-id='" + id + "'>✏️ Bearbeiten</button>"
+          + "<button type='button' class='btn dark small' data-quiz-action='present' data-id='" + id + "'>🖥️ Präsentieren</button>"
+          + "<button type='button' class='btn light small' data-quiz-action='edit' data-id='" + id + "'>✏️ Bearbeiten</button>"
           + "<button type='button' class='icon-btn' data-quiz-action='duplicate' data-id='" + id + "' title='Duplizieren'>⧉</button>"
           + "<button type='button' class='icon-btn' data-quiz-action='delete' data-id='" + id + "' data-name='" + escapeHtml(quiz.name) + "' title='Löschen'>🗑</button>"
           + "</div></div>";
@@ -1457,22 +1437,22 @@ function renderEditor() {
       + "<button type='button' class='icon-btn' data-action='copy' data-q='" + i + "' title='Frage kopieren'>⧉</button>"
       + "<button type='button' class='icon-btn' data-action='delete' data-q='" + i + "' title='Frage löschen'>🗑</button>"
       + "</div></div>"
-      + "<div class='field-label'>Frage</div>"
+      + "<div class='label'>Frage</div>"
       + "<textarea data-field='text' data-q='" + i + "' rows='2' maxlength='400' placeholder='Schreibe hier deine Frage …'>" + escapeHtml(question.text) + "</textarea>"
       + "<div class='q-settings'>"
-      + "<div><div class='field-label'>Zeit</div><div class='time-row'><input type='number' min='5' max='300' step='5' data-field='duration' data-q='" + i + "' value='" + escapeHtml(question.duration) + "'><span>Sekunden</span></div></div>"
-      + "<div><div class='field-label'>Punkte</div><select data-field='points' data-q='" + i + "'>"
+      + "<div><div class='label'>Zeit</div><div class='time-row'><input type='number' min='5' max='300' step='5' data-field='duration' data-q='" + i + "' value='" + escapeHtml(question.duration) + "'><span>Sekunden</span></div></div>"
+      + "<div><div class='label'>Punkte</div><select data-field='points' data-q='" + i + "'>"
       + [["standard", "Standard (bis 1000)"], ["double", "⚡ Doppelt (bis 2000)"], ["none", "Ohne Punkte"]]
           .map(([value, label]) => "<option value='" + value + "'" + (question.points === value ? " selected" : "") + ">" + label + "</option>").join("")
       + "</select></div></div>"
-      + "<div class='field-label'>Bild (optional)</div>"
+      + "<div class='label'>Bild (optional)</div>"
       + "<div class='image-box'>"
       + (question.image ? "<img src='" + escapeHtml(question.image) + "' alt='Vorschau'>" : "<div class='image-empty'>Kein Bild</div>")
-      + "<div class='image-actions'><label class='btn secondary small'>📷 " + (question.image ? "Bild ändern" : "Bild hinzufügen")
+      + "<div class='image-actions'><label class='btn light small'>📷 " + (question.image ? "Bild ändern" : "Bild hinzufügen")
       + "<input type='file' accept='image/*' data-field='image' data-q='" + i + "' hidden></label>"
-      + (question.image ? "<button type='button' class='btn ghost small' data-action='remove-image' data-q='" + i + "'>Bild entfernen</button>" : "")
+      + (question.image ? "<button type='button' class='btn light small' data-action='remove-image' data-q='" + i + "'>Bild entfernen</button>" : "")
       + "</div></div>"
-      + "<div class='field-label'>Antworten – hake alle richtigen an</div>"
+      + "<div class='label'>Antworten – hake alle richtigen an</div>"
       + "<div class='option-list'>"
       + question.options.map((option, j) => {
           const correct = question.correctIndices.includes(j);
@@ -1484,7 +1464,7 @@ function renderEditor() {
             + (question.options.length <= 1 ? " disabled" : "") + ">✕</button></div>";
         }).join("")
       + "</div>"
-      + (canAddOption ? "<button type='button' class='btn ghost small add-option' data-action='add-option' data-q='" + i + "'>＋ Antwort hinzufügen</button>" : "")
+      + (canAddOption ? "<button type='button' class='btn light small add-option' data-action='add-option' data-q='" + i + "'>＋ Antwort hinzufügen</button>" : "")
       + "</article>";
   }).join("") || "<p class='empty-hint' style='margin-top:14px'>Noch keine Fragen. Leg los mit „Neue Frage“!</p>";
   updateSaveBar();
