@@ -13,8 +13,11 @@ const MAX_DURATION_SECONDS = 300;
 const MAX_PLAYERS = 40;
 const MAX_QUESTIONS = 50;
 const MAX_QUIZZES = 50;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "leon.batzel";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "1121";
+// Leerzeichen und Zeilenumbrüche am Rand (z. B. beim Einfügen in ein Secret-Feld) werden ignoriert.
+const ENV_ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim();
+const ENV_ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || "").trim();
+const ADMIN_EMAIL = ENV_ADMIN_EMAIL || "leon.batzel";
+const ADMIN_PASSWORD = ENV_ADMIN_PASSWORD || "1121";
 
 // Ablauf einer Frage: Countdown -> Frage -> Auflösung -> Zwischenstand -> nächste Frage
 const COUNTDOWN_MS = 3_000;
@@ -460,7 +463,9 @@ function safeEqual(a, b) {
 
 function checkAdmin(body) {
   return Boolean(ADMIN_EMAIL && ADMIN_PASSWORD
-    && safeEqual(body.email, ADMIN_EMAIL) && safeEqual(body.password, ADMIN_PASSWORD));
+    // Bei der E-Mail spielt Groß-/Kleinschreibung keine Rolle.
+    && safeEqual(String(body.email || "").trim().toLowerCase(), ADMIN_EMAIL.toLowerCase())
+    && safeEqual(String(body.password || "").trim(), ADMIN_PASSWORD));
 }
 
 function authorizeAdmin(body, response) {
@@ -839,4 +844,7 @@ const server = http.createServer((request, response) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log("Quiz-Ecke ist gestartet auf Port " + PORT + ".");
+  // Zeigt nur, WOHER die Zugangsdaten kommen – niemals die Werte selbst.
+  console.log("Admin-E-Mail: " + (ENV_ADMIN_EMAIL ? "aus ADMIN_EMAIL (" + ENV_ADMIN_EMAIL.length + " Zeichen)" : "Standardwert (ADMIN_EMAIL ist nicht gesetzt!)"));
+  console.log("Admin-Passwort: " + (ENV_ADMIN_PASSWORD ? "aus ADMIN_PASSWORD (" + ENV_ADMIN_PASSWORD.length + " Zeichen)" : "Standardwert (ADMIN_PASSWORD ist nicht gesetzt!)"));
 });
